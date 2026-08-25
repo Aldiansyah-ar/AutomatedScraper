@@ -89,7 +89,6 @@ def generate_visualization():
 
     output_image = 'news_count.png'
     plt.savefig(output_image, dpi=300)
-    plt.close()
 
 if __name__ == '__main__':
     scrape_detik()
