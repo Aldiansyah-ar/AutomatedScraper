@@ -51,45 +51,5 @@ def scrape_detik():
   df_cleaned = df[~df['url'].str.contains(regex_pattern, regex=True, na=False)]
   df_cleaned.to_csv(f'{file_name}.csv', index=False)
 
-def generate_visualization():
-    file_name = 'gempantt'
-    df = pd.read_csv(f"{file_name}.csv")
-    df['date_clean'] = df['date'].str.extract(r'(\d{1,2}\s+[A-Za-z]{3}\s+\d{4})')
-
-    month_map = {
-        'Jan': 'Jan', 'Feb': 'Feb', 'Mar': 'Mar', 'Apr': 'Apr', 
-        'Mei': 'May', 'Jun': 'Jun', 'Jul': 'Jul', 'Agu': 'Aug', 
-        'Agt': 'Aug', 'Sep': 'Sep', 'Okt': 'Oct', 'Nov': 'Nov', 'Des': 'Dec'
-    }
-
-    for indo, eng in month_map.items():
-        df['date_clean'] = df['date_clean'].str.replace(indo, eng, regex=False)
-
-    df['parsed_date'] = pd.to_datetime(df['date_clean'], format='%d %b %Y', errors='coerce')
-    daily_counts = df.groupby('parsed_date').size().reset_index(name='jumlah_berita')
-    daily_counts = daily_counts.sort_values('parsed_date')
-
-    title = 'News Count'
-    plt.figure(figsize=(12, 5))
-    plt.plot(
-        daily_counts['parsed_date'], 
-        daily_counts['jumlah_berita'], 
-        marker='o', 
-        markersize=3, 
-        color='#1f77b4', 
-        linewidth=1.5,
-        label='Source: detiknews.com'
-    )
-    plt.title(f'{title}', fontsize=14, fontweight='bold', pad=15)
-    plt.xlabel('Date', fontsize=11)
-    plt.ylabel('Count', fontsize=11)
-    plt.grid(True, linestyle='--', alpha=0.6)
-    plt.legend(loc='upper right', frameon=True, fontsize=10)
-    plt.tight_layout()
-
-    output_image = 'news_count.png'
-    plt.savefig(output_image, dpi=300)
-
 if __name__ == '__main__':
     scrape_detik()
-    generate_visualization()
