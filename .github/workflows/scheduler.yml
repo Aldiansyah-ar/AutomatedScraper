@@ -28,5 +28,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add .
+          git pull origin main --rebase
+          git add hasil_scraping_detik.csv
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update hasil scraping otomatis" && git push)
