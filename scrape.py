@@ -52,5 +52,5 @@ if __name__ == '__main__':
     start_date = day.strftime('%d/%m/%Y')
     end_date = day.strftime('%d/%m/%Y')
 
-    for q in queries:
-        scrape_detik_for_query(q, start_date, end_date)
+    for query in queries:
+        scrape_detik(query, start_date, end_date)
