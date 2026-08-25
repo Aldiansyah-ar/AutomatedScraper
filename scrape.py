@@ -1,8 +1,8 @@
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 import csv
-import os
 import requests
+import pandas as pd
 
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 
@@ -21,9 +21,9 @@ def scrape_detik():
   query = 'Gempa NTT'
 
   today = datetime.now()
-  yesterday = today - timedelta(days=1)
-  start_date = yesterday.strftime('%d/%m/%Y')
-  end_date = yesterday.strftime('%d/%m/%Y')
+  day = today - timedelta(days=2)
+  start_date = day.strftime('%d/%m/%Y')
+  end_date = day.strftime('%d/%m/%Y')
 
   file_name = 'gempantt'
   last_page = detik_page(query, start_date, end_date)
@@ -45,6 +45,11 @@ def scrape_detik():
         link = article.find("div", "media__text").find("a")["href"]
         date = article.find("div", "media__date").text
         writer.writerow({"title": headline, "url": link, "date": date})
+
+  df = pd.read_csv(f'{file_name}.csv')
+  regex_pattern = r'^https?:\/\/20\.detik\.com'
+  df_cleaned = df[~df['url'].str.contains(regex_pattern, regex=True, na=False)]
+  df_cleaned.to_csv(f'{file_name}.csv', index=False)
 
 if __name__ == '__main__':
   scrape_detik()

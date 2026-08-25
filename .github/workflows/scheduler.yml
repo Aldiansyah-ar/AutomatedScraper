@@ -2,11 +2,8 @@ name: Auto Scrape Detik
 
 on:
   schedule:
-    # Berjalan setiap hari pukul 00:00 WIB. 
-    # Catatan: GitHub Actions menggunakan zona waktu UTC. 
-    # 00:00 WIB = 17:00 UTC (hari sebelumnya). Maka ditulis '0 17 * * *'
-    - cron: '0 17 * * *'
-  workflow_dispatch: # Memungkinkan Anda menjalankan skrip secara manual dari web GitHub
+    - cron: '0 18 * * *'
+  workflow_dispatch: 
 
 jobs:
   scrape:
@@ -22,7 +19,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install requests beautifulsoup4 lxml
+          pip install requests beautifulsoup4 lxml pandas
 
       - name: Run scraper script
         run: python scrape.py
