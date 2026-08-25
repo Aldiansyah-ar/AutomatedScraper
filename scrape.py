@@ -53,15 +53,7 @@ def scrape_detik():
 
 def generate_visualization():
     file_name = 'gempantt'
-  
-    if not os.path.exists(file_name):
-        print("CSV file is not found.")
-        return
-
     df = pd.read_csv(f'{file_name}')
-    if df.empty:
-        print("No data")
-        return
     df['date_clean'] = df['date'].str.extract(r'(\d{1,2}\s+[A-Za-z]{3}\s+\d{4})')
 
     month_map = {
