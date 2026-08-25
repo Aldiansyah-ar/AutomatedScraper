@@ -53,7 +53,7 @@ def scrape_detik():
 
 def generate_visualization():
     file_name = 'gempantt'
-    df = pd.read_csv(f'{file_name}')
+    df = pd.read_csv(f"{file_name}.csv")
     df['date_clean'] = df['date'].str.extract(r'(\d{1,2}\s+[A-Za-z]{3}\s+\d{4})')
 
     month_map = {
