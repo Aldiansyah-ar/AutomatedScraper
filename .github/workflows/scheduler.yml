@@ -31,5 +31,5 @@ jobs:
           git stash
           git pull origin main --rebase
           git stash pop
-          git add gempantt.csv
+          git add -A
           git diff --quiet && git diff --staged --quiet || (git commit -m "Update hasil scraping otomatis" && git push)
