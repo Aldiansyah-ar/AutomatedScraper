@@ -52,19 +52,16 @@ def scrape_detik():
   df_cleaned.to_csv(f'{file_name}.csv', index=False)
 
 def generate_visualization():
-    print("Membuat visualisasi grafik...")
-    file_name = 'karhutla.csv'
-    
+    file_name = 'gempantt'
+  
     if not os.path.exists(file_name):
-        print("File CSV tidak ditemukan untuk divisualisasikan.")
+        print("CSV file is not found.")
         return
 
-    df = pd.read_csv(f'./{file_name}')
-    
+    df = pd.read_csv(f'{file_name}')
     if df.empty:
         print("No data")
         return
-
     df['date_clean'] = df['date'].str.extract(r'(\d{1,2}\s+[A-Za-z]{3}\s+\d{4})')
 
     month_map = {
