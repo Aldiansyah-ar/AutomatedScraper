@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import csv
 import requests
 import pandas as pd
-import matplotlib.pyplot as plt
 
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 
@@ -18,14 +17,8 @@ def detik_page(query, start_date, end_date):
     last_page = 1
   return last_page
 
-def scrape_detik():
-  query = 'Gempa NTT'
-  today = datetime.now()
-  day = today - timedelta(days=2)
-  start_date = day.strftime('%d/%m/%Y')
-  end_date = day.strftime('%d/%m/%Y')
-
-  file_name = 'gempantt'
+def scrape_detik(query, start_date, end_date):
+  file_name = query.lower().replace(" ", "_")
   last_page = detik_page(query, start_date, end_date)
 
   with open(f"{file_name}.csv", mode="a", newline="", encoding="utf-8") as csv_file:
@@ -52,4 +45,12 @@ def scrape_detik():
   df_cleaned.to_csv(f'{file_name}.csv', index=False)
 
 if __name__ == '__main__':
-    scrape_detik()
+    queries = ['Gempa NTT', 'Karhutla']
+    
+    today = datetime.now()
+    day = today - timedelta(days=2)
+    start_date = day.strftime('%d/%m/%Y')
+    end_date = day.strftime('%d/%m/%Y')
+
+    for q in queries:
+        scrape_detik_for_query(q, start_date, end_date)
