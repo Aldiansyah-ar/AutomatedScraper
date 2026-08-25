@@ -22,8 +22,8 @@ def scrape_detik():
 
   today = datetime.now()
   yesterday = today - timedelta(days=1)
-  start_date = today.strftime('%d/%m/%Y')
-  end_date = today.strftime('%d/%m/%Y')
+  start_date = yesterday.strftime('%d/%m/%Y')
+  end_date = yesterday.strftime('%d/%m/%Y')
 
   file_name = 'gempantt'
   last_page = detik_page(query, start_date, end_date)
