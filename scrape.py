@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import csv
 import requests
 import pandas as pd
+import os
 
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 
@@ -19,12 +20,15 @@ def detik_page(query, start_date, end_date):
 
 def scrape_detik(query, start_date, end_date):
   file_name = query.lower().replace(" ", "_")
+  file_path = f"{file_name}.csv"
+  file_exists = os.path.exists(file_path) and os.path.getsize(file_path) > 0
   last_page = detik_page(query, start_date, end_date)
 
   with open(f"{file_name}.csv", mode="a", newline="", encoding="utf-8") as csv_file:
     fieldnames = ["title", "url", "date"]
     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-    writer.writeheader()
+    if not file_exists:
+        writer.writeheader()
 
     for page in range(1, int(last_page) + 1):
       url = f"https://www.detik.com/search/searchnews?query={query}&siteid=3&sortby=time&sorttime=1&fromdatex={start_date}&todatex={end_date}&result_type=latest&page={page}"
@@ -48,7 +52,7 @@ if __name__ == '__main__':
     queries = ['Gempa NTT', 'Karhutla']
     
     today = datetime.now()
-    day = today - timedelta(days=2)
+    day = today - timedelta(days=1)
     start_date = day.strftime('%d/%m/%Y')
     end_date = day.strftime('%d/%m/%Y')
 
