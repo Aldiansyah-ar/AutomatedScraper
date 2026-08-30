@@ -47,7 +47,7 @@ def plot_counts(title, daily_counts):
 
 st.sidebar.header("Data Settings")
 DATA_DIR = "./"
-csv_files = glob.glob(os.path.join(DATA_DIR, "*.csv"))
+csv_files = glob.glob(os.path.join(DATA_DIR, "**", "*.csv"), recursive=True)
 
 if csv_files:
     file_names = [os.path.basename(f) for f in csv_files]
