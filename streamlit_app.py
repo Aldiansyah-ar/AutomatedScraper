@@ -59,13 +59,13 @@ if csv_files:
     
     if daily_counts is not None and not daily_counts.empty:
         daily_counts = daily_counts.dropna(subset=['parsed_date'])
+        
         min_date = daily_counts['parsed_date'].min().date()
         max_date = daily_counts['parsed_date'].max().date()
         
         st.sidebar.markdown("---")
         st.sidebar.header("Filter Tanggal")
         
-        # Widget rentang tanggal di sidebar
         selected_date_range = st.sidebar.date_input(
             "Pilih Rentang Tanggal",
             value=(min_date, max_date),
@@ -76,9 +76,9 @@ if csv_files:
         if isinstance(selected_date_range, tuple) and len(selected_date_range) == 2:
             start_date, end_date = selected_date_range
             mask = (daily_counts['parsed_date'].dt.date >= start_date) & (daily_counts['parsed_date'].dt.date <= end_date)
-            filtered_counts = daily_counts.loc[mask]
+            filtered_counts = daily_counts.loc[mask].copy()
         else:
-            filtered_counts = daily_counts
+            filtered_counts = daily_counts.copy()
 
         if not filtered_counts.empty:
             col1, col2 = st.columns(2)
@@ -87,8 +87,15 @@ if csv_files:
             
             plot_counts(f"News Trend ({selected_file_name})", filtered_counts)
             
-            with st.expander("Detail"):
-                st.dataframe(filtered_counts, use_container_width=True)
+            filtered_counts['parsed_date'] = filtered_counts['parsed_date'].dt.strftime('%Y-%m-%d')
+            csv_data = filtered_counts.to_csv(index=False).encode('utf-8')
+            
+            st.download_button(
+                label="Download News Count CSV (Filtered)",
+                data=csv_data,
+                file_name=f"filtered_news_count_{selected_file_name}",
+                mime="text/csv",
+            )
         else:
             st.warning("Tidak ada data pada rentang tanggal yang dipilih.")
     else:
