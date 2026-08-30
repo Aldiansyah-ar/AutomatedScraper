@@ -47,10 +47,13 @@ def plot_counts(title, daily_counts):
 
 st.sidebar.header("Data Settings")
 DATA_DIR = "./"
+
+# Pencarian file CSV secara rekursif hingga ke dalam subfolder
 csv_files = glob.glob(os.path.join(DATA_DIR, "**", "*.csv"), recursive=True)
 
 if csv_files:
-    file_names = [os.path.basename(f) for f in csv_files]
+    # Menggunakan os.path.relpath agar struktur folder ikut tampil di selectbox dan aman dari konflik nama file sama
+    file_names = [os.path.relpath(f, DATA_DIR) for f in csv_files]
     selected_file_name = st.sidebar.selectbox("Pilih File CSV:", file_names)
     selected_file_path = os.path.join(DATA_DIR, selected_file_name)
     df = pd.read_csv(selected_file_path)
@@ -91,9 +94,9 @@ if csv_files:
             csv_data = filtered_counts.to_csv(index=False).encode('utf-8')
             
             st.download_button(
-                label="Download News Count CSV (Filtered)",
+                label="📥 Download Data CSV (Filtered)",
                 data=csv_data,
-                file_name=f"filtered_news_count_{selected_file_name}",
+                file_name=f"filtered_news_count_{os.path.basename(selected_file_name)}",
                 mime="text/csv",
             )
         else:
@@ -101,4 +104,4 @@ if csv_files:
     else:
         st.warning("Date data invalid.")
 else:
-    st.sidebar.warning(f"No CSV file in `{DATA_DIR}` folder.")
+    st.sidebar.warning(f"No CSV file in `{DATA_DIR}` folder or subfolders.")
