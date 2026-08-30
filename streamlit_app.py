@@ -54,14 +54,43 @@ if csv_files:
     selected_file_name = st.sidebar.selectbox("Pilih File CSV:", file_names)
     selected_file_path = os.path.join(DATA_DIR, selected_file_name)
     df = pd.read_csv(selected_file_path)
+    
     daily_counts = counts(df)
+    
     if daily_counts is not None and not daily_counts.empty:
-        col1, col2 = st.columns(2)
-        col1.metric(label="Total Count", value=int(daily_counts['jumlah_berita'].sum()))
-        col2.metric(label="Total Day", value=len(daily_counts))
-        plot_counts(f"News Trend ({selected_file_name})", daily_counts)
-        with st.expander("Detail"):
-            st.dataframe(daily_counts, use_container_width=True)
+        daily_counts = daily_counts.dropna(subset=['parsed_date'])
+        min_date = daily_counts['parsed_date'].min().date()
+        max_date = daily_counts['parsed_date'].max().date()
+        
+        st.sidebar.markdown("---")
+        st.sidebar.header("Filter Tanggal")
+        
+        # Widget rentang tanggal di sidebar
+        selected_date_range = st.sidebar.date_input(
+            "Pilih Rentang Tanggal",
+            value=(min_date, max_date),
+            min_value=min_date,
+            max_value=max_date
+        )
+        
+        if isinstance(selected_date_range, tuple) and len(selected_date_range) == 2:
+            start_date, end_date = selected_date_range
+            mask = (daily_counts['parsed_date'].dt.date >= start_date) & (daily_counts['parsed_date'].dt.date <= end_date)
+            filtered_counts = daily_counts.loc[mask]
+        else:
+            filtered_counts = daily_counts
+
+        if not filtered_counts.empty:
+            col1, col2 = st.columns(2)
+            col1.metric(label="Total Count", value=int(filtered_counts['jumlah_berita'].sum()))
+            col2.metric(label="Total Day", value=len(filtered_counts))
+            
+            plot_counts(f"News Trend ({selected_file_name})", filtered_counts)
+            
+            with st.expander("Detail"):
+                st.dataframe(filtered_counts, use_container_width=True)
+        else:
+            st.warning("Tidak ada data pada rentang tanggal yang dipilih.")
     else:
         st.warning("Date data invalid.")
 else:
