@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
+import pandas as pd
 import csv
 import requests
-import pandas as pd
 import os
+import re
 
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 
@@ -24,11 +25,13 @@ def scrape_detik(query, start_date, end_date):
   file_exists = os.path.exists(file_path) and os.path.getsize(file_path) > 0
   last_page = detik_page(query, start_date, end_date)
 
+  regex_pattern = r'^https?:\/\/20\.detik\.com'
+
   with open(f"{file_name}.csv", mode="a", newline="", encoding="utf-8") as csv_file:
     fieldnames = ["title", "url", "date"]
     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
     if not file_exists:
-        writer.writeheader()
+      writer.writeheader()
 
     for page in range(1, int(last_page) + 1):
       url = f"https://www.detik.com/search/searchnews?query={query}&siteid=3&sortby=time&sorttime=1&fromdatex={start_date}&todatex={end_date}&result_type=latest&page={page}"
@@ -40,21 +43,25 @@ def scrape_detik(query, start_date, end_date):
       for article in articles_container:
         headline = article.find("div", "media__text").find("a").text
         link = article.find("div", "media__text").find("a")["href"]
-        date = article.find("div", "media__date").text
-        writer.writerow({"title": headline, "url": link, "date": date})
+        if not re.match(regex_pattern, link):
+          text_ = requests.get(link, user_agent).text
+          soup_ = BeautifulSoup(text_, "lxml")
+          date = soup_.find("div", "detail__date").text
+          writer.writerow(
+            {"title": headline, "url": link, "date": date}
+          )
 
   df = pd.read_csv(f'{file_name}.csv')
-  regex_pattern = r'^https?:\/\/20\.detik\.com'
-  df_cleaned = df[~df['url'].str.contains(regex_pattern, regex=True, na=False)]
-  df_cleaned.to_csv(f'{file_name}.csv', index=False)
+  df = df.drop_duplicates(subset=['title'])
+  df.to_csv(f'{file_name}.csv', index=False)
 
 if __name__ == '__main__':
-    queries = ['Gempa NTT', 'Karhutla']
+  queries = ['Gempa NTT', 'Karhutla']
     
-    today = datetime.now()
-    day = today - timedelta(days=1)
-    start_date = day.strftime('%d/%m/%Y')
-    end_date = day.strftime('%d/%m/%Y')
+  today = datetime.now()
+  yesterday = today - timedelta(days=1)
+  start_date = yesterday.strftime('%d/%m/%Y')
+  end_date = today.strftime('%d/%m/%Y')
 
-    for query in queries:
-        scrape_detik(query, start_date, end_date)
+  for query in queries:
+    scrape_detik(query, start_date, end_date)
