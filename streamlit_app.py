@@ -48,14 +48,33 @@ def plot_counts(title, daily_counts):
 st.sidebar.header("Data Settings")
 DATA_DIR = "./"
 
-# Pencarian file CSV secara rekursif hingga ke dalam subfolder
+# Pencarian file CSV secara rekursif
 csv_files = glob.glob(os.path.join(DATA_DIR, "**", "*.csv"), recursive=True)
 
 if csv_files:
-    # Menggunakan os.path.relpath agar struktur folder ikut tampil di selectbox dan aman dari konflik nama file sama
-    file_names = [os.path.relpath(f, DATA_DIR) for f in csv_files]
+    # Mengelompokkan file berdasarkan foldernya masing-masing
+    folder_dict = {}
+    for f in csv_files:
+        rel_path = os.path.relpath(f, DATA_DIR)
+        folder_name = os.path.dirname(rel_path)
+        if folder_name == "":
+            folder_name = "(Root)"
+        if folder_name not in folder_dict:
+            folder_dict[folder_name] = []
+        folder_dict[folder_name].append(f)
+        
+    folders = sorted(list(folder_dict.keys()))
+    
+    # 1. Pilih Folder terlebih dahulu
+    selected_folder = st.sidebar.selectbox("Pilih Folder:", folders)
+    
+    # 2. Pilih File CSV berdasarkan folder yang aktif
+    files_in_folder = folder_dict[selected_folder]
+    file_names = [os.path.basename(f) for f in files_in_folder]
     selected_file_name = st.sidebar.selectbox("Pilih File CSV:", file_names)
-    selected_file_path = os.path.join(DATA_DIR, selected_file_name)
+    
+    # Ambil path lengkap file yang dipilih
+    selected_file_path = next(f for f in files_in_folder if os.path.basename(f) == selected_file_name)
     df = pd.read_csv(selected_file_path)
     
     daily_counts = counts(df)
@@ -94,9 +113,9 @@ if csv_files:
             csv_data = filtered_counts.to_csv(index=False).encode('utf-8')
             
             st.download_button(
-                label="📥 Download Data CSV (Filtered)",
+                label="Download Data CSV (Filtered)",
                 data=csv_data,
-                file_name=f"filtered_news_count_{os.path.basename(selected_file_name)}",
+                file_name=f"filtered_news_count_{selected_file_name}",
                 mime="text/csv",
             )
         else:
