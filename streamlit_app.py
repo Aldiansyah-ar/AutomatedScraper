@@ -52,29 +52,13 @@ DATA_DIR = "./"
 csv_files = glob.glob(os.path.join(DATA_DIR, "**", "*.csv"), recursive=True)
 
 if csv_files:
-    # Mengelompokkan file berdasarkan foldernya masing-masing
-    folder_dict = {}
-    for f in csv_files:
-        rel_path = os.path.relpath(f, DATA_DIR)
-        folder_name = os.path.dirname(rel_path)
-        if folder_name == "":
-            folder_name = "(Root)"
-        if folder_name not in folder_dict:
-            folder_dict[folder_name] = []
-        folder_dict[folder_name].append(f)
-        
-    folders = sorted(list(folder_dict.keys()))
+    # Langsung ambil daftar file beserta path relatifnya tanpa filter folder
+    file_dict = {os.path.relpath(f, DATA_DIR): f for f in csv_files}
+    file_names = sorted(list(file_dict.keys()))
     
-    # 1. Pilih Folder terlebih dahulu
-    selected_folder = st.sidebar.selectbox("Pilih Folder:", folders)
-    
-    # 2. Pilih File CSV berdasarkan folder yang aktif
-    files_in_folder = folder_dict[selected_folder]
-    file_names = [os.path.basename(f) for f in files_in_folder]
     selected_file_name = st.sidebar.selectbox("Pilih File CSV:", file_names)
+    selected_file_path = file_dict[selected_file_name]
     
-    # Ambil path lengkap file yang dipilih
-    selected_file_path = next(f for f in files_in_folder if os.path.basename(f) == selected_file_name)
     df = pd.read_csv(selected_file_path)
     
     daily_counts = counts(df)
@@ -86,10 +70,10 @@ if csv_files:
         max_date = daily_counts['parsed_date'].max().date()
         
         st.sidebar.markdown("---")
-        st.sidebar.header("Filter Tanggal")
+        st.sidebar.header("Date")
         
         selected_date_range = st.sidebar.date_input(
-            "Pilih Rentang Tanggal",
+            "Choose date range",
             value=(min_date, max_date),
             min_value=min_date,
             max_value=max_date
@@ -107,15 +91,15 @@ if csv_files:
             col1.metric(label="Total Count", value=int(filtered_counts['jumlah_berita'].sum()))
             col2.metric(label="Total Day", value=len(filtered_counts))
             
-            plot_counts(f"News Trend ({selected_file_name})", filtered_counts)
+            plot_counts(f"News Trend ({os.path.basename(selected_file_name)})", filtered_counts)
             
             filtered_counts['parsed_date'] = filtered_counts['parsed_date'].dt.strftime('%Y-%m-%d')
             csv_data = filtered_counts.to_csv(index=False).encode('utf-8')
             
             st.download_button(
-                label="Download Data CSV (Filtered)",
+                label="Download News Count",
                 data=csv_data,
-                file_name=f"filtered_news_count_{selected_file_name}",
+                file_name=f"filtered_news_count_{os.path.basename(selected_file_name)}",
                 mime="text/csv",
             )
         else:
