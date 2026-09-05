@@ -54,8 +54,8 @@ def scrape_detik(query, start_date, end_date, file_name):
   df.to_csv(f'{file_name}.csv', index=False)
 
 if __name__ == '__main__':
-  queries = ['Gempa NTT', 'Karhutla']
-  file_name = ['gempantt', 'karhutla']
+  queries = ['Gempa NTT', 'Karhutla', 'Keracunan MBG']
+  file_name = ['gempantt', 'karhutla', 'keracunanmbg']
     
   today = datetime.now()
   yesterday = today - timedelta(days=1)
